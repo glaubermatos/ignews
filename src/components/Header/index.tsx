@@ -1,3 +1,4 @@
+import { SignInButton } from '../SignInButton'
 import styles from './styles.module.scss'
 
 export function Header() {
@@ -9,10 +10,8 @@ export function Header() {
                     <a className={styles.active}>Home</a>
                     <a>Posts</a>
                 </nav>
-                {/* <button>
-                    <img src="/images/github.svg" alt="github" />
-                    Sing in with GitHub
-                </button> */}
+                
+                <SignInButton />
             </div>
         </header>
     )
