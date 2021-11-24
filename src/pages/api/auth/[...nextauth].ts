@@ -19,18 +19,39 @@ export default NextAuth({
     async signIn( user, account, profile ) {
       const { email } = user  
       
-      console.log(email)
-
-      fauna.query(
-        q.Create(
-          q.Collection('users'),
-          { data: { email }}
+      try {
+        fauna.query(
+          q.If(
+            q.Not(
+              q.Exists(
+                q.Match(
+                  q.Index('user_by_email'),
+                  q.Casefold(user.email)
+                )
+              )
+            ),
+            q.Create(
+              q.Collection('users'),
+              { data: { email }}
+            ),
+            q.Get(
+              q.Match(
+                q.Index('user_by_email'),
+                q.Casefold(user.email)
+              )
+            )
+          )
         )
-      )
-      .then((ret) => console.log(ret))
-      .catch((err) => console.error('Error: %s', err))
+        .then((ret) => console.log(ret))
+        .catch((err) => {
+          console.error('Error: %s', err)
+          return false
+        })
 
-      return true
+        return true
+      } catch {
+        return false
+      }
     },
 }
 })
