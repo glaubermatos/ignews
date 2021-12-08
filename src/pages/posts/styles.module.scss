@@ -1,6 +1,7 @@
 .container {
     max-width: 1120px;
     margin: 0 auto;
+    padding: 0 2rem;
 }
 
 .posts {
@@ -10,15 +11,15 @@
     a {
         display: block;
 
+        time {
+            display: block;
+            color: var(--gray-300);
+        }
+
         & + a {
             margin-top: 2rem;
             padding-top: 2rem;
             border-top: 1px solid var(--gray-700);
-        }
-
-        time {
-            display: block;
-            color: var(--gray-300);
         }
 
         strong {
