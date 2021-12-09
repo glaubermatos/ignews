@@ -39,8 +39,14 @@ export const getServerSideProps: GetServerSideProps = async ({ req, params }) =>
     const session = await getSession({req})   
     const { slug } = params
     
-    if (!session) {
-        console.log('É preciso estar logado para ter acesso ao post')
+    //redireciona o usuario para a home caso não tenha uma subscription ativa
+    if (!session?.activeSubscription) {
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false
+            }
+        }
     }
 
     const prismic = getPrismicClient(req)

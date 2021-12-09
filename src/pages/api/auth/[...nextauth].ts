@@ -15,12 +15,55 @@ export default NextAuth({
     }),
     // ...add more providers here
   ],
-  callbacks: {
+  callbacks: {    
+    async session(session) {
+
+      try {
+        const userActiveSubscription = await fauna.query(
+          //obtem os dados da subscription do usuário que corresponde com a sessão
+          q.Get(
+            //obter a subscription que atende aos dois critérios de busca,
+            //subscription do usuário logado e subscription ativa
+            q.Intersection([
+              //buscar subscription pelo user ref do usuario logado
+              q.Match(
+                q.Index('subscription_by_user_ref'),
+                //retorna apenas o user ref do usuário que corresponde com o email
+                q.Select(
+                  'ref',
+                  q.Get(
+                    q.Match(
+                      q.Index('user_by_email'),
+                      q.Casefold(session.user.email)//obtem o email da sessão do usuario logado
+                    )
+                  )
+                )
+              ),
+              // verifica subscription ativa
+              q.Match(
+                q.Index('subscription_by_status'),
+                'active'
+              )
+            ])
+          )
+        )
+
+        return {
+          ...session,
+          activeSubscription: userActiveSubscription
+        }
+      } catch {
+        return {
+          ...session,
+          activeSubscription: null
+        }
+      }
+    },
     async signIn( user, account, profile ) {
       const { email } = user  
       
       try {
-        fauna.query(
+        await fauna.query(
           q.If(
             q.Not(
               q.Exists(
@@ -42,14 +85,10 @@ export default NextAuth({
             )
           )
         )
-        .then((ret) => console.log(ret))
-        .catch((err) => {
-          console.error('Error: %s', err)
-          return false
-        })
-
+        
         return true
-      } catch {
+      } catch (err) {
+        console.error('Error: %s', err)
         return false
       }
     },

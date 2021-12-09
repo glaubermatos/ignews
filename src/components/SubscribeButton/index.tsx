@@ -2,12 +2,15 @@ import { signIn, useSession } from 'next-auth/client'
 import getStripeJS from '../../services/stripe-js'
 import { api } from '../../services/api'
 import styles from './styles.module.scss'
+import { useRouter } from 'next/dist/client/router'
 
 interface SubscribeButtonProps {
     priceId: string
 }
 
 export function SubscribeButton({priceId}: SubscribeButtonProps) {
+    const router = useRouter()
+
     //tem acesso a sessão do usuário
     const [session] = useSession()
     
@@ -15,6 +18,13 @@ export function SubscribeButton({priceId}: SubscribeButtonProps) {
         if(!session) {
             signIn('github')
             return;
+        }
+
+        console.log(session)
+
+        if (session.activeSubscription) {
+            router.push('/posts')
+            return
         }
 
         try {
